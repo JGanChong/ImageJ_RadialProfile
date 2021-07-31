@@ -1,0 +1,68 @@
+/*
+ * Tested with FIJI/ImageJ 1.53r
+ * Java 1.8.0_172 (64bit)
+ * 
+ * Create a radial profile of ellipse or circle.
+ * 
+ * Instruction:
+ * denote the area to measure using the ellipse tool. Run macro
+ * 
+ * Macro by Johnny Gan johnny.gan@berkeley.edu
+ * Tested July 2021
+ */
+
+setOption("ExpandableArrays",true)
+
+//get area to measure
+Roi.getBounds(x, y, width, height);
+
+//find center of area
+xcenter = x + width/2;
+ycenter = y + height/2;
+
+//find longest axis
+if (height < width) {
+	ystep = 1;
+	xstep = width/height;
+	shortest = height;
+}
+else {
+	ystep = height/width;
+	xstep = 1;
+	shortest = width;	
+}
+
+//create array to store values
+xarray = newArray();
+yarray = newArray();
+
+
+//iterate over different radius
+for (s = 1; s <= shortest; s++) {
+
+	//get new width and height
+	w = (xstep*(s));
+	h = (ystep*(s));
+
+	//get new ellipse origin (which is top left corner)
+	newx = xcenter - (w/2);
+	newy = ycenter - (h/2); 
+
+	//make new ellipse
+	makeOval(newx, newy, w, h);
+	//get values and find average
+	Roi.getContainedPoints(xpoints, ypoints);
+	value_arr = newArray();
+	for (i = 0; i < xpoints.length; i++) {
+		value_arr[i] = getValue(xpoints[i], ypoints[i]);
+	}
+	Array.getStatistics(value_arr, min, max, mean, stdDev);
+
+	//store values
+	yarray[s] = mean;
+	xarray[s] = (s/shortest);
+
+}
+//plot
+title =getTitle();
+Plot.create("Radial Profile of " + title , "Relative distance from center (%)", "Mean value", xarray, yarray);
