@@ -36,9 +36,9 @@ else {
 xarray = newArray();
 yarray = newArray();
 
-
+count = 0;
 //iterate over different radius
-for (s = 1; s <= shortest; s++) {
+for (s = 1; s <= shortest; s+=1) {
 
 	//get new width and height
 	w = (xstep*(s));
@@ -47,21 +47,17 @@ for (s = 1; s <= shortest; s++) {
 	//get new ellipse origin (which is top left corner)
 	newx = xcenter - (w/2);
 	newy = ycenter - (h/2); 
-
-	//make new ellipse
+	
+	//make new ellipse and chane to a line (outline)
 	makeOval(newx, newy, w, h);
-	//get values and find average
-	Roi.getContainedPoints(xpoints, ypoints);
-	value_arr = newArray();
-	for (i = 0; i < xpoints.length; i++) {
-		value_arr[i] = getValue(xpoints[i], ypoints[i]);
-	}
-	Array.getStatistics(value_arr, min, max, mean, stdDev);
-
+	run("Fit Ellipse");
+	run("Area to Line");
+	//Get values
+	getStatistics(area, mean, min, max, std, histogram);
 	//store values
-	yarray[s] = mean;
-	xarray[s] = (s/shortest);
-
+	yarray[count] = mean;
+	xarray[count] = (s/shortest);
+	count++;
 }
 //plot
 title =getTitle();
